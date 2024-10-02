@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?><project name="Techplan" company="" webLink="http://" view-date="2024-09-13" view-index="0" gantt-divider-location="348" resource-divider-location="300" version="3.3.3311" locale="fr_FR">
+    <description/>
+    <view zooming-state="default:0" id="gantt-chart">
+        <field id="tpd3" name="Nom" width="189" order="0"/>
+        <field id="tpd4" name="Date de début" width="72" order="1"/>
+        <field id="tpd5" name="Date de fin" width="71" order="2"/>
+        <option id="taskLabelUp" value="name"/>
+        <option id="taskLabelDown" value="resources"/>
+        <option id="filter.completedTasks" value="false"/>
+        <option id="filter.dueTodayTasks" value="false"/>
+        <option id="filter.overdueTasks" value="false"/>
+        <option id="filter.inProgressTodayTasks" value="false"/>
+        <option id="color.recent"><![CDATA[#ffff00 #ff9900 #00ff00 #ff0000]]></option>
+    </view>
+    <view id="resource-table">
+        <field id="0" name="Nom" width="210" order="0"/>
+        <field id="1" name="Rôle par défaut" width="86" order="1"/>
+    </view>
+    <!-- -->
+    <calendars>
+        <day-types>
+            <day-type id="0"/>
+            <day-type id="1"/>
+            <default-week id="1" name="default" sun="1" mon="0" tue="0" wed="0" thu="0" fri="0" sat="1"/>
+            <only-show-weekends value="true"/>
+            <overriden-day-types/>
+            <days/>
+        </day-types>
+    </calendars>
+    <tasks empty-milestones="true">
+        <taskproperties>
+            <taskproperty id="tpd0" name="type" type="default" valuetype="icon"/>
+            <taskproperty id="tpd1" name="priority" type="default" valuetype="icon"/>
+            <taskproperty id="tpd2" name="info" type="default" valuetype="icon"/>
+            <taskproperty id="tpd3" name="name" type="default" valuetype="text"/>
+            <taskproperty id="tpd4" name="begindate" type="default" valuetype="date"/>
+            <taskproperty id="tpd5" name="enddate" type="default" valuetype="date"/>
+            <taskproperty id="tpd6" name="duration" type="default" valuetype="int"/>
+            <taskproperty id="tpd7" name="completion" type="default" valuetype="int"/>
+            <taskproperty id="tpd8" name="coordinator" type="default" valuetype="text"/>
+            <taskproperty id="tpd9" name="predecessorsr" type="default" valuetype="text"/>
+        </taskproperties>
+        <task id="0" uid="a7afb130fb5948489ec293a549de5d0b" name="Analyse" meeting="false" start="2024-09-11" duration="7" complete="100" expand="true">
+            <depend id="1" type="2" difference="0" hardness="Strong"/>
+            <task id="5" uid="92cc0fe4e1ce4f9c8f6def76f812c2a9" name="Plannification des tâches" meeting="false" start="2024-09-11" duration="7" complete="100" expand="true"/>
+            <task id="6" uid="b12b1ca4c79d485fae25b1966c017ff1" name="Mise en place des outils" meeting="false" start="2024-09-11" duration="7" complete="100" expand="true"/>
+            <task id="8" uid="9f679da799ef4c2e81c1d006c52dd8b4" name="Diagramme de cas d'utilisation" meeting="false" start="2024-09-11" duration="7" complete="100" expand="true"/>
+        </task>
+        <task id="1" uid="bd46a1e48db5463c96c9b467c3afedf2" name="Conception" meeting="false" start="2024-09-18" duration="7" complete="100" expand="true">
+            <depend id="2" type="2" difference="0" hardness="Strong"/>
+            <task id="9" uid="b51ced8ce90e4b6bbdce01eb274a6636" name="Diagramme de classe" color="#ffff00" meeting="false" start="2024-09-18" duration="7" complete="100" thirdDate="2024-09-18" thirdDate-constraint="0" expand="true"/>
+            <task id="17" uid="b5c66d9a7d324aa99bd0d7e105c4820a" name="Diagramme de séquence" color="#ffff00" meeting="false" start="2024-09-18" duration="7" complete="100" expand="true"/>
+            <task id="10" uid="d5eb2c5840244c32ba6a6829e0853730" name="Schéma conceptuel MCD" color="#ffff00" meeting="false" start="2024-09-18" duration="7" complete="100" expand="true"/>
+            <task id="11" uid="338730195e1b4707bf5c6974a2eacd14" name="Modèle logique MLD" color="#ffff00" meeting="false" start="2024-09-18" duration="7" complete="100" expand="true"/>
+        </task>
+        <task id="2" uid="099781af7b5b48b7993a9b1cc7c2e6d9" name="Developpement" meeting="false" start="2024-09-25" duration="56" complete="0" expand="true">
+            <depend id="3" type="2" difference="0" hardness="Strong"/>
+            <task id="12" uid="da9483882d56401bb8908c6393522c18" name="Création de l'application" color="#ff0000" meeting="false" start="2024-09-25" duration="56" complete="0" expand="true"/>
+        </task>
+        <task id="3" uid="1e24d5e59d524853be035a93635c746d" name="Test" meeting="false" start="2024-11-20" duration="14" complete="0" expand="true">
+            <depend id="4" type="2" difference="0" hardness="Strong"/>
+            <task id="13" uid="bffc2da3d7a64b4cbe4b11311ea7ed72" name="Test fonctionnel" color="#00ff00" meeting="false" start="2024-11-20" duration="14" complete="0" expand="true"/>
+            <task id="14" uid="c8475105dd744f3cb5d6c84d2ddc4113" name="Test unitaire" color="#00ff00" meeting="false" start="2024-11-20" duration="14" complete="0" expand="true"/>
+        </task>
+        <task id="4" uid="3f804edf399b408194b14270bb08c781" name="Rédaction" meeting="false" start="2024-12-04" duration="14" complete="0" expand="true">
+            <task id="15" uid="735ab7627dbe41969b4c9ad4a0e55b48" name="Documentation technique" color="#ff9900" meeting="false" start="2024-12-04" duration="14" complete="0" expand="true"/>
+            <task id="16" uid="c52e2345c41d403f9756d12a91dbfcf8" name="Guide d'utilisation" color="#ff9900" meeting="false" start="2024-12-04" duration="14" complete="0" expand="true"/>
+        </task>
+    </tasks>
+    <resources>
+        <resource id="0" name="Bouzid Ghlamallah" function="Default:0" contacts="" phone=""/>
+        <resource id="1" name="Lucas Bourguet" function="Default:0" contacts="" phone=""/>
+        <resource id="2" name="Aristide Decrouy" function="Default:0" contacts="" phone=""/>
+    </resources>
+    <allocations>
+        <allocation task-id="6" resource-id="0" function="Default:0" responsible="true" load="100.0"/>
+        <allocation task-id="12" resource-id="0" function="Default:0" responsible="false" load="100.0"/>
+        <allocation task-id="14" resource-id="0" function="Default:0" responsible="true" load="100.0"/>
+        <allocation task-id="15" resource-id="0" function="Default:0" responsible="false" load="50.0"/>
+        <allocation task-id="10" resource-id="0" function="Default:0" responsible="true" load="100.0"/>
+        <allocation task-id="11" resource-id="0" function="Default:0" responsible="true" load="100.0"/>
+        <allocation task-id="5" resource-id="1" function="Default:0" responsible="true" load="100.0"/>
+        <allocation task-id="12" resource-id="1" function="Default:0" responsible="true" load="100.0"/>
+        <allocation task-id="13" resource-id="1" function="Default:0" responsible="false" load="50.0"/>
+        <allocation task-id="16" resource-id="1" function="Default:0" responsible="true" load="100.0"/>
+        <allocation task-id="9" resource-id="1" function="Default:0" responsible="true" load="100.0"/>
+        <allocation task-id="10" resource-id="1" function="Default:0" responsible="false" load="100.0"/>
+        <allocation task-id="8" resource-id="2" function="Default:0" responsible="true" load="100.0"/>
+        <allocation task-id="9" resource-id="2" function="Default:0" responsible="false" load="50.0"/>
+        <allocation task-id="12" resource-id="2" function="Default:0" responsible="false" load="100.0"/>
+        <allocation task-id="13" resource-id="2" function="Default:0" responsible="true" load="100.0"/>
+        <allocation task-id="15" resource-id="2" function="Default:0" responsible="true" load="100.0"/>
+        <allocation task-id="17" resource-id="2" function="Default:0" responsible="true" load="50.0"/>
+        <allocation task-id="9" resource-id="2" function="Default:0" responsible="false" load="50.0"/>
+    </allocations>
+    <vacations/>
+    <previous/>
+    <roles roleset-name="Default"/>
+</project>
