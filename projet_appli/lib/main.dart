@@ -1,125 +1,236 @@
 import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(AgendaApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
+class AgendaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Agenda',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: AgendaPage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
+class AgendaPage extends StatefulWidget {
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _AgendaPageState createState() => _AgendaPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _AgendaPageState extends State<AgendaPage> {
+  late DateTime _selectedDay;
+  late Map<DateTime, List<Intervention>> _interventions; // Dictionnaire d'interventions
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _selectedDay = DateTime.now(); // Jour sélectionné par défaut
+    _interventions = {}; // Initialiser le dictionnaire d'interventions
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text('Mon Agenda'),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
+      body: Column(
+        children: [
+          TableCalendar<Intervention>(
+            firstDay: DateTime.now().subtract(Duration(days: 365)), // Un an en arrière
+            lastDay: DateTime.now().add(Duration(days: 365)), // Un an en avant
+            focusedDay: _selectedDay,
+            selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                _selectedDay = selectedDay; // Met à jour le jour sélectionné
+              });
+            },
+            eventLoader: (day) {
+              return _interventions[day] ?? []; // Charge les interventions pour le jour sélectionné
+            },
+          ),
+          const SizedBox(height: 8.0),
+          ElevatedButton(
+            onPressed: () => _showAddInterventionDialog(context), // Ouvrir la boîte de dialogue pour ajouter une intervention
+            child: Text('Ajouter une intervention'),
+          ),
+          Expanded(
+            child: _buildInterventionList(), // Liste des interventions pour le jour sélectionné
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+
+  // Fonction pour afficher la liste des interventions
+  Widget _buildInterventionList() {
+    final interventionsForSelectedDay = _interventions[_selectedDay] ?? [];
+    return ListView.builder(
+      itemCount: interventionsForSelectedDay.length,
+      itemBuilder: (context, index) {
+        final intervention = interventionsForSelectedDay[index];
+        return ListTile(
+          title: Text(intervention.titre),
+          subtitle: Text('Client: ${intervention.client} - Statut: ${intervention.statut}'),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(Icons.edit),
+                onPressed: () => _showEditInterventionDialog(context, intervention), // Éditer l'intervention
+              ),
+              IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () => _removeIntervention(intervention), // Supprimer l'intervention
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Fonction pour afficher la boîte de dialogue d'ajout d'intervention
+  void _showAddInterventionDialog(BuildContext context) {
+    final titleController = TextEditingController();
+    final clientController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Ajouter une intervention'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: InputDecoration(labelText: 'Titre de l\'intervention'),
+              ),
+              TextField(
+                controller: clientController,
+                decoration: InputDecoration(labelText: 'Client'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                final title = titleController.text;
+                final client = clientController.text;
+                if (title.isNotEmpty && client.isNotEmpty) {
+                  _addIntervention(Intervention(
+                    titre: title,
+                    client: client,
+                    statut: 'En attente',
+                    date: _selectedDay,
+                  ));
+                  Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                }
+              },
+              child: Text('Ajouter'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), // Fermer la boîte de dialogue sans ajouter
+              child: Text('Annuler'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Fonction pour ajouter une intervention
+  void _addIntervention(Intervention intervention) {
+    setState(() {
+      if (_interventions[_selectedDay] == null) {
+        _interventions[_selectedDay] = [];
+      }
+      _interventions[_selectedDay]!.add(intervention); // Ajouter l'intervention à la date
+    });
+  }
+
+  // Fonction pour supprimer une intervention
+  void _removeIntervention(Intervention intervention) {
+    setState(() {
+      _interventions[_selectedDay]?.remove(intervention); // Supprimer l'intervention de la liste
+    });
+  }
+
+  // Fonction pour afficher la boîte de dialogue d'édition d'intervention
+  void _showEditInterventionDialog(BuildContext context, Intervention intervention) {
+    final titleController = TextEditingController(text: intervention.titre);
+    final clientController = TextEditingController(text: intervention.client);
+    final statusController = TextEditingController(text: intervention.statut);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Modifier l\'intervention'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: InputDecoration(labelText: 'Titre de l\'intervention'),
+              ),
+              TextField(
+                controller: clientController,
+                decoration: InputDecoration(labelText: 'Client'),
+              ),
+              TextField(
+                controller: statusController,
+                decoration: InputDecoration(labelText: 'Statut'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                final title = titleController.text;
+                final client = clientController.text;
+                final status = statusController.text;
+                if (title.isNotEmpty && client.isNotEmpty && status.isNotEmpty) {
+                  setState(() {
+                    intervention.titre = title; // Modifier le titre
+                    intervention.client = client; // Modifier le client
+                    intervention.statut = status; // Modifier le statut
+                  });
+                  Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                }
+              },
+              child: Text('Sauvegarder'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), // Fermer la boîte de dialogue sans enregistrer
+              child: Text('Annuler'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+// Classe représentant une intervention
+class Intervention {
+  String titre;
+  String client;
+  String statut;
+  DateTime date;
+
+  Intervention({
+    required this.titre,
+    required this.client,
+    required this.statut,
+    required this.date,
+  });
 }
