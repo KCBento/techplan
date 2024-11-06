@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:projet_appli/pages/add_event_page.dart';
 /*import 'package:projet_appli/pages/home_page.dart';*/
-import 'package:table_calendar/table_calendar.dart';
 
 void main() {
-  runApp(AgendaApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -21,35 +20,6 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _currentIndex = index;
     });
-  }
-}
-class AgendaApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Agenda',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: AgendaPage(),
-    );
-  }
-}
-
-class AgendaPage extends StatefulWidget {
-  @override
-  _AgendaPageState createState() => _AgendaPageState();
-}
-
-class _AgendaPageState extends State<AgendaPage> {
-  late DateTime _selectedDay;
-  late Map<DateTime, List<Intervention>> _interventions; // Dictionnaire d'interventions
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedDay = DateTime.now(); // Jour sélectionné par défaut
-    _interventions = {}; // Initialiser le dictionnaire d'interventions
   }
 
   @override
@@ -86,19 +56,4 @@ class _AgendaPageState extends State<AgendaPage> {
           ),
     );
   }
-}
-
-// Classe représentant une intervention
-class Intervention {
-  String titre;
-  String client;
-  String statut;
-  DateTime date;
-
-  Intervention({
-    required this.titre,
-    required this.client,
-    required this.statut,
-    required this.date,
-  });
 }
