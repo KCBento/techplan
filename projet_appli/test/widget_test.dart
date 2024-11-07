@@ -3,9 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:projet_appli/main.dart'; // Assurez-vous que le chemin est correct
 
 void main() {
-  testWidgets('Agenda app has a title and adds interventions', (WidgetTester tester) async {
-    // Construire l'application
-    await tester.pumpWidget(AgendaApp());
+
+    testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(MyApp());
+
 
     // Vérifier que le titre de l'application est présent
     expect(find.text('Mon Agenda'), findsOneWidget);
