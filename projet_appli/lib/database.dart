@@ -1,6 +1,8 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+import 'agenda_app.dart';
+
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   factory DatabaseHelper() => _instance;
@@ -35,13 +37,6 @@ class DatabaseHelper {
     ''');
 
     await db.execute('''
-      CREATE TABLE Signature (
-        id_Signature INTEGER PRIMARY KEY,
-        date_Signature TEXT
-      );
-    ''');
-
-    await db.execute('''
       CREATE TABLE Agenda (
         id_Agenda INTEGER PRIMARY KEY
       );
@@ -52,11 +47,10 @@ class DatabaseHelper {
         id_Technicien INTEGER PRIMARY KEY,
         Nom TEXT,
         Prenom TEXT,
+        estConnecte INTEGER DEFAULT 0,
         id_Connexion INTEGER,
-        id_Signature INTEGER,
         id_Agenda INTEGER,
         FOREIGN KEY(id_Connexion) REFERENCES Connexion(id_Connexion),
-        FOREIGN KEY(id_Signature) REFERENCES Signature(id_Signature),
         FOREIGN KEY(id_Agenda) REFERENCES Agenda(id_Agenda)
       );
     ''');
@@ -72,7 +66,6 @@ class DatabaseHelper {
       CREATE TABLE Fichier (
         id_Fichier INTEGER PRIMARY KEY,
         Lien TEXT,
-        Type_Fichier TEXT
       );
     ''');
 
@@ -80,14 +73,13 @@ class DatabaseHelper {
       CREATE TABLE Intervention (
         id_Intervention INTEGER PRIMARY KEY,
         Titre TEXT,
-        Date TEXT,
+        Date Date,
         Heure TEXT,
         Statut TEXT,
         id_Description INTEGER,
-        id_Signature INTEGER,
         id_Fichier INTEGER,
+        Client VARCHAR(100),
         FOREIGN KEY(id_Description) REFERENCES Description(id_Description),
-        FOREIGN KEY(id_Signature) REFERENCES Signature(id_Signature),
         FOREIGN KEY(id_Fichier) REFERENCES Fichier(id_Fichier)
       );
     ''');
@@ -114,14 +106,6 @@ class DatabaseHelper {
              ('Lucas', 'admin');
     ''');
 
-    // Insertion des données dans Signature
-    await db.execute('''
-      INSERT INTO Signature (date_Signature)
-      VALUES ('2024-01-01'),
-             ('2024-02-01'),
-             ('2024-03-01');
-    ''');
-
     // Insertion des données dans Agenda
     await db.execute('''
       INSERT INTO Agenda (id_Agenda)
@@ -130,10 +114,10 @@ class DatabaseHelper {
 
     // Insertion des données dans Technicien
     await db.execute('''
-      INSERT INTO Technicien (Nom, Prenom, id_Connexion, id_Signature, id_Agenda)
-      VALUES ('Decrouy', 'Aristide', 1, 1, 1),
-             ('Ghlamallah', 'Bouzid', 2, 2, 2),
-             ('Bourguet', 'Lucas', 3, 3, 3);
+      INSERT INTO Technicien (Nom, Prenom, id_Connexion, id_Agenda)
+      VALUES ('Decrouy', 'Aristide', 1, 1),
+             ('Ghlamallah', 'Bouzid', 2, 2),
+             ('Bourguet', 'Lucas', 3, 3);
     ''');
 
     // Insertion des données dans Commentaire
@@ -144,10 +128,10 @@ class DatabaseHelper {
 
     // Insertion des données dans Intervention
     await db.execute('''
-      INSERT INTO Intervention (Titre, Date, Heure, Statut, id_Description, id_Signature, id_Fichier)
-      VALUES ('Intervention 1', '2024-05-01', '10:00', 'En cours', 1, 1, 1),
-             ('Intervention 2', '2024-06-01', '11:00', 'Terminé', 2, 2, 2),
-             ('Intervention 3', '2024-07-01', '09:00', 'En attente', 3, 3, 3);
+      INSERT INTO Intervention (Titre, Date, Heure, Statut, id_Description, id_Fichier, Client)
+      VALUES ('Intervention 1', '2024-11-01', '10:00', 'En cours', 1, 1, 'Paul'),
+             ('Intervention 2', '2024-06-01', '11:00', 'Terminé', 2, 2, 'Lorenzo'),
+             ('Intervention 3', '2024-07-01', '09:00', 'En attente', 3, 3, 'Valentin');
     ''');
 
     // Insertion des données dans Contenir
@@ -161,7 +145,7 @@ class DatabaseHelper {
 
 
   // Obtenir les techniciens avec leurs connexions
-  Future<List<Map<String, dynamic>>> obtenirTechniciens() async {
+  Future<List<Map<String, dynamic>>> getTechnicians() async {
     Database db = await database;
     return await db.rawQuery('''
       SELECT Technicien.Nom, Technicien.Prenom, Connexion.Login, Connexion.Mot_De_Passe
@@ -171,16 +155,119 @@ class DatabaseHelper {
     ''');
   }
 
-  Future<bool> verifierIdentifiants(String login, String motDePasse) async {
+  Future<bool> checkConnection(String login, String password) async {
     Database db = await database;
     List<Map<String, dynamic>> result = await db.rawQuery(
       '''
     SELECT * FROM Connexion
     WHERE Login = ? AND Mot_De_Passe = ?
     ''',
-      [login, motDePasse],
+      [login, password],
     );
     return result.isNotEmpty; // Retourne true si un utilisateur est trouvé
+  }
+
+  Future<List<Intervention>> fetchInterventionsForTechnician(int technicianId) async {
+    Database db = await database;
+    List<Map<String, dynamic>> result = await db.rawQuery(
+      '''
+    SELECT Intervention.Titre, Intervention.Date, Intervention.Heure, Intervention.Statut, Description.contenu, Fichier.lien, Intervention.Client  
+    FROM Intervention
+    INNER JOIN Contenir ON Contenir.id_Intervention = Intervention.id_Intervention
+    INNER JOIN Agenda ON Agenda.id_Agenda = Contenir.id_Agenda
+    INNER JOIN Technicien ON Technicien.id_Agenda = Agenda.id_Agenda
+    LEFT JOIN Description ON Description.id_Description = Intervention.id_Description
+    LEFT JOIN Fichier ON Fichier.id_Fichier = Intervention.id_Fichier
+    WHERE Technicien.id_Technicien = ?;
+    ''',
+      [technicianId],
+    );
+
+    List<Intervention> interventions = result.map((map) {
+      return Intervention(
+        titre: map['Titre'],
+        client: map['Client'],
+        statut: map['Statut'],
+        debut: DateTime.parse(map['Date'] + ' ' + map['Heure']), // Fusionne la date et l'heure
+        fin: DateTime.parse(map['Date'] + ' ' + map['Heure']).add(Duration(hours: 1)), // Exemple d'ajout d'une heure pour la fin
+        commentaire: map['contenu'],
+        fichierPath: map['lien'],
+      );
+    }).toList();
+
+    return interventions;
+  }
+
+  Future<void> updateTechnicianLoginStatus(int technicianId) async {
+    Database db = await database;
+
+    // Connecter le technicien spécifique
+    await db.rawUpdate(
+      'UPDATE Technicien SET estConnecte = 1 WHERE id_Technicien = ?',
+      [technicianId],
+    );
+  }
+
+
+  Future<int> getTechnicianId() async {
+    Database db = await database; // Accès à votre instance SQLite
+
+    List<Map<String, dynamic>> result = await db.rawQuery(
+        'SELECT id_Technicien FROM Technicien WHERE estConnecte = ? LIMIT 1',
+        [1]
+    );
+
+    if (result.isNotEmpty) {
+      return result.first['id_Technicien'] as int; // Retourne l'ID du technicien connecté
+    } else {
+      throw Exception('Technicien non trouvé ou non connecté.');
+    }
+  }
+
+  Future<int> getTechnicianIdByCredentials(String username, String password) async {
+    Database db = await database;
+
+    // Requête pour vérifier les identifiants
+    List<Map<String, dynamic>> result = await db.rawQuery(
+      '''
+      SELECT id_Technicien FROM Technicien
+      INNER JOIN Connexion ON Connexion.id_Connexion = Technicien.id_Connexion
+      WHERE Login = ? AND Mot_De_Passe = ? 
+      LIMIT 1
+      ''',
+      [username, password]
+    );
+
+    // Si un technicien est trouvé, retourner son ID
+    return result.first['id_Technicien'] as int;
+
+
+  }
+
+  Future<void> addInterventionFromTechnician(int technicianId, Intervention intervention) async {
+    Database db = await database;
+
+    await db.rawUpdate('''
+      INSERT INTO Description (contenu)
+      VALUES (?),
+      ''',
+      [intervention.commentaire]
+    );
+
+    await db.rawUpdate('''
+      INSERT INTO Fichier (Lien)
+      VALUES (?),
+      ''',
+        [intervention.fichierPath.toString()]
+    );
+
+    await db.rawUpdate('''
+      INSERT INTO Intervention (Titre, Date, Heure, Statut, id_Description, id_Fichier, Client)
+      VALUES (?, ?, ?, ?, 1, 1, ?),
+      ''',
+      [intervention.titre, DateTime(intervention.debut.year, intervention.debut.month, intervention.debut.day),
+        DateTime(intervention.debut.hour, intervention.debut.minute), intervention.statut, intervention.client]
+    );
   }
 
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:projet_appli/pages/add_event_page.dart';
+import 'package:mon_agenda/pages/add_event_page.dart';
 /*import 'package:projet_appli/pages/home_page.dart';*/
 
-import 'database.dart';
+
 
 
 void main() {

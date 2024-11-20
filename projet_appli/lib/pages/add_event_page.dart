@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 
+import '../agenda_app.dart';
 import '../database.dart';
 
 class AddEventPage extends StatefulWidget {
@@ -30,13 +31,19 @@ class _AddEventPageState extends State<AddEventPage> {
       String login = LoginController.text;
       String motDePasse = PassWordController.text;
 
-      bool estValide = await DatabaseHelper().verifierIdentifiants(login, motDePasse);
+      bool estValide = await DatabaseHelper().checkConnection(login, motDePasse);
 
       if (estValide) {
+        int idTechnician = await DatabaseHelper().getTechnicianIdByCredentials(login, motDePasse);
+        DatabaseHelper().updateTechnicianLoginStatus(idTechnician);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Connexion réussie")),
         );
         // Naviguer vers une autre page ou faire d'autres actions après connexion réussie
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => AgendaApp()),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Identifiant ou mot de passe incorrect")),
@@ -124,14 +131,23 @@ class _AddEventPageState extends State<AddEventPage> {
                   ),
                 ),
                 Container(
-                  margin: const EdgeInsets.only(top: 300, left: 10),
+                  margin: const EdgeInsets.only(top: 300, left: 10, bottom: 10),
                   child: (
-                    const Text("Avez-vous oublier un identifiant ou mot de passe ?"
-                        "Veuillez nous contacter sur ce 05 87 98 45 61",
+                    const Text("Avez-vous oublier un identifiant ou mot de passe ?",
                       style: TextStyle(
                         fontSize: 15.6
                       ),
                     )
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.only(left: 10),
+                  child: (
+                      const Text("Veuillez nous contacter sur ce 05 87 98 45 61",
+                        style: TextStyle(
+                            fontSize: 15.6
+                        ),
+                      )
                   ),
                 ),
               ],
