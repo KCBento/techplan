@@ -65,7 +65,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE Fichier (
         id_Fichier INTEGER PRIMARY KEY,
-        Lien TEXT,
+        Lien TEXT
       );
     ''');
 
@@ -171,7 +171,7 @@ class DatabaseHelper {
     Database db = await database;
     List<Map<String, dynamic>> result = await db.rawQuery(
       '''
-    SELECT Intervention.Titre, Intervention.Date, Intervention.Heure, Intervention.Statut, Description.contenu, Fichier.lien, Intervention.Client  
+    SELECT Intervention.id_Intervention, Intervention.Titre, Intervention.Date, Intervention.Heure, Intervention.Statut, Description.contenu, Fichier.lien, Intervention.Client  
     FROM Intervention
     INNER JOIN Contenir ON Contenir.id_Intervention = Intervention.id_Intervention
     INNER JOIN Agenda ON Agenda.id_Agenda = Contenir.id_Agenda
@@ -185,12 +185,13 @@ class DatabaseHelper {
 
     List<Intervention> interventions = result.map((map) {
       return Intervention(
+        id: map['id_Intervention'],
         titre: map['Titre'],
         client: map['Client'],
         statut: map['Statut'],
         debut: DateTime.parse(map['Date'] + ' ' + map['Heure']), // Fusionne la date et l'heure
         fin: DateTime.parse(map['Date'] + ' ' + map['Heure']).add(Duration(hours: 1)), // Exemple d'ajout d'une heure pour la fin
-        commentaire: map['contenu'],
+        commentaire: map['contenu'] ?? 'Pas de description',
         fichierPath: map['lien'],
       );
     }).toList();
@@ -244,31 +245,153 @@ class DatabaseHelper {
 
   }
 
-  Future<void> addInterventionFromTechnician(int technicianId, Intervention intervention) async {
+  Future<int> addIntervention(int technicianId, Intervention intervention) async {
     Database db = await database;
 
-    await db.rawUpdate('''
+    int? descriptionId;
+    if (intervention.commentaire.isNotEmpty) {
+      descriptionId = await db.rawInsert('''
       INSERT INTO Description (contenu)
-      VALUES (?),
+      VALUES (?)
       ''',
-      [intervention.commentaire]
-    );
+          [intervention.commentaire]
+      );
+    }
 
-    await db.rawUpdate('''
+
+
+    int? fichierId;
+    if (intervention.fichierPath != null && intervention.fichierPath!.isNotEmpty) {
+      fichierId = await db.rawInsert('''
       INSERT INTO Fichier (Lien)
-      VALUES (?),
+      VALUES (?)
       ''',
-        [intervention.fichierPath.toString()]
+          [intervention.fichierPath.toString()]
+      );
+    }
+
+    String date = '${intervention.debut.year}-${intervention.debut.month.toString().padLeft(2, '0')}-${intervention.debut.day.toString().padLeft(2, '0')}';
+    String heure = '${intervention.debut.hour.toString().padLeft(2, '0')}:${intervention.debut.minute.toString().padLeft(2, '0')}';
+    int idIntervention = await db.rawInsert('''
+      INSERT INTO Intervention (Titre, Date, Heure, Statut, id_Description, id_Fichier, Client)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+      ''',
+        [intervention.titre,
+          date,
+          heure,
+          intervention.statut,
+          descriptionId,
+          fichierId,
+          intervention.client]
     );
 
-    await db.rawUpdate('''
-      INSERT INTO Intervention (Titre, Date, Heure, Statut, id_Description, id_Fichier, Client)
-      VALUES (?, ?, ?, ?, 1, 1, ?),
+    List<Map<String, dynamic>> result = await db.rawQuery(
+        'SELECT id_Agenda FROM Technicien WHERE id_Technicien = ?',
+        [technicianId]
+    );
+
+    int idAgenda = result.first['id_Agenda'];
+
+    await db.rawInsert('''
+    INSERT INTO Contenir (id_Intervention, id_Agenda)
+    VALUES (?, ?)
+    ''',
+      [idIntervention, idAgenda]
+    );
+
+    return idIntervention;
+  }
+
+  Future<void> updateIntervention(Intervention intervention) async {
+    Database db = await database;
+
+    // Formatage de la date et de l'heure
+    String date = '${intervention.debut.year}-${intervention.debut.month.toString().padLeft(2, '0')}-${intervention.debut.day.toString().padLeft(2, '0')}';
+    String heure = '${intervention.debut.hour.toString().padLeft(2, '0')}:${intervention.debut.minute.toString().padLeft(2, '0')}';
+
+    List<Map<String, dynamic>> result = await db.rawQuery(
+        'SELECT id_Description, id_Fichier FROM Intervention WHERE id_Intervention = ?',
+        [intervention.id]
+    );
+    int? descriptionId = result.first['id_Description'];
+    int? fichierId = result.first['id_Fichier'];
+
+    if (intervention.commentaire.isNotEmpty && descriptionId == null) {
+      descriptionId = await db.rawInsert('''
+      INSERT INTO Description (contenu)
+      VALUES (?)
       ''',
-      [intervention.titre, DateTime(intervention.debut.year, intervention.debut.month, intervention.debut.day),
-        DateTime(intervention.debut.hour, intervention.debut.minute), intervention.statut, intervention.client]
+          [intervention.commentaire]
+      );
+    }
+
+    if (intervention.fichierPath != null && intervention.fichierPath!.isNotEmpty && fichierId == null) {
+      fichierId = await db.rawInsert('''
+      INSERT INTO Fichier (Lien)
+      VALUES (?)
+      ''',
+          [intervention.fichierPath.toString()]
+      );
+    }
+
+    // Exécution de la mise à jour
+    await db.update(
+      'Intervention', // Nom de la table
+      {
+        'Titre': intervention.titre,
+        'Date': date,
+        'Heure': heure,
+        'Statut': intervention.statut,
+        'id_Description': descriptionId,
+        'id_Fichier': fichierId,
+        'Client': intervention.client,
+      },
+      where: 'id_Intervention = ?', // Clause WHERE pour cibler une ligne
+      whereArgs: [intervention.id], // Arguments pour WHERE
     );
   }
+
+  Future<void> deleteIntervention(Intervention intervention) async {
+    Database db = await database;
+
+    List<Map<String, dynamic>> result = await db.rawQuery(
+        'SELECT id_Description, id_Fichier FROM Intervention WHERE id_Intervention = ?',
+        [intervention.id]
+    );
+    int? descriptionId = result.first['id_Description'];
+    int? fichierId = result.first['id_Fichier'];
+
+    if (descriptionId != null) {
+      await db.delete(
+        'Description',
+        where: 'id_Description = ?',
+        whereArgs: [descriptionId],
+      );
+    }
+
+    if (fichierId != null) {
+      await db.delete(
+        'Fichier',
+        where: 'id_Fichier = ?',
+        whereArgs: [fichierId],
+      );
+    }
+
+    await db.delete(
+      'Contenir',
+      where: 'id_Intervention = ?',
+      whereArgs: [intervention.id],
+    );
+
+    await db.delete(
+      'Intervention',
+      where: 'id_Intervention = ?',
+      whereArgs: [intervention.id],
+    );
+  }
+
+
+
 
 
 

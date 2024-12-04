@@ -35,6 +35,7 @@ class _AgendaPageState extends State<AgendaPage> {
     _loadInterventionsForTechnician();
   }
 
+
   Future<void> _loadInterventionsForTechnician() async {
     int technicianId = await DatabaseHelper().getTechnicianId();
     List<Intervention> interventions = await DatabaseHelper().fetchInterventionsForTechnician(technicianId);
@@ -212,6 +213,7 @@ class _AgendaPageState extends State<AgendaPage> {
                   final startDateTime = DateTime(selectedDate.year, selectedDate.month, selectedDate.day, selectedStartTime.hour, selectedStartTime.minute);
                   final endDateTime = startDateTime.add(selectedDuration);
                   _addIntervention(Intervention(
+                    id: null,
                     titre: title,
                     client: client,
                     statut: 'En attente',
@@ -235,20 +237,23 @@ class _AgendaPageState extends State<AgendaPage> {
     );
   }
 
-  void _addIntervention(Intervention intervention) {
+  void _addIntervention(Intervention intervention) async {
+    int technicianId = await DatabaseHelper().getTechnicianId();
+    int interventionId = await DatabaseHelper().addIntervention(technicianId, intervention);
+    intervention.id = interventionId;
     setState(() {
-      if (_interventions[_selectedDay] == null) {
-        _interventions[_selectedDay] = [];
-      }
-      _interventions[_selectedDay]!.add(intervention);
+      _interventions[_selectedDay]?.add(intervention);
     });
-
+    _loadInterventionsForTechnician();
   }
 
-  void _removeIntervention(Intervention intervention) {
+
+  void _removeIntervention(Intervention intervention) async {
+    await DatabaseHelper().deleteIntervention(intervention);
     setState(() {
       _interventions[_selectedDay]?.remove(intervention);
     });
+    _loadInterventionsForTechnician();
   }
 
   void _showEditInterventionDialog(BuildContext context, Intervention intervention) {
@@ -308,13 +313,14 @@ class _AgendaPageState extends State<AgendaPage> {
           ),
           actions: [
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 final title = titleController.text;
                 final client = clientController.text;
                 final status = statusController.text;
                 final duration = int.tryParse(durationController.text) ?? 60;
                 final comment = commentController.text;
                 final updatedIntervention = Intervention(
+                  id: intervention.id,
                   titre: title,
                   client: client,
                   statut: status,
@@ -323,11 +329,12 @@ class _AgendaPageState extends State<AgendaPage> {
                   commentaire: comment,
                   fichierPath: intervention.fichierPath,
                 );
-
+                await DatabaseHelper().updateIntervention(updatedIntervention);
                 setState(() {
                   _interventions[_selectedDay]?.remove(intervention);
                   _interventions[_selectedDay]?.add(updatedIntervention);
                 });
+                _loadInterventionsForTechnician();
                 Navigator.of(context).pop();
                 },
                 child: Text('Sauvegarder'),
@@ -405,6 +412,7 @@ class _AgendaPageState extends State<AgendaPage> {
 }
 
 class Intervention {
+  int? id;
   final String titre;
   final String client;
   String statut;
@@ -414,6 +422,7 @@ class Intervention {
   final String? fichierPath;
 
   Intervention({
+    required this.id,
     required this.titre,
     required this.client,
     required this.statut,
