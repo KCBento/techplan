@@ -17,7 +17,7 @@ class _AddEventPageState extends State<AddEventPage> {
   final PassWordController = TextEditingController();
   bool _isPasswordVisible = false;
 
-  /*String selectedNameType = "GHLAMALLAH BOUZID";*/
+
 
   @override
   void dispose() {
@@ -40,10 +40,7 @@ class _AddEventPageState extends State<AddEventPage> {
           const SnackBar(content: Text("Connexion réussie")),
         );
         // Naviguer vers une autre page ou faire d'autres actions après connexion réussie
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => AgendaApp()),
-        );
+        Navigator.pushReplacementNamed(context, '/home');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Identifiant ou mot de passe incorrect")),
@@ -54,106 +51,110 @@ class _AddEventPageState extends State<AddEventPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-        child: Container(
-          margin: const EdgeInsets.all(20),
-          child: Form(
-            key: _formkey,
-            child: Column(
-              children: [
-                Container(
-                  margin: EdgeInsets.only(top: 156, bottom: 10),
-                  child: (const Text(
-                    "Connexion",
-                    style: TextStyle(fontSize: 35),
-                  )),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top: 20, bottom: 20),
-                  child: TextFormField(
-                    style: const TextStyle(color: Colors.black),
-                    decoration: const InputDecoration(
-                      labelText: "Identifiant",
-                      labelStyle: TextStyle(color: Colors.black),
-                      hintText: "Veuillez saisir un identifiant",
-                      border: OutlineInputBorder()
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text("Bienvenue sur l'agenda de techplan"),
+        ),
+        body: SingleChildScrollView(
+          child: Container(
+            margin: const EdgeInsets.all(20),
+            child: Form(
+              key: _formkey,
+              child: Column(
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 156, bottom: 10),
+                    child: const Text(
+                      "Connexion",
+                      style: TextStyle(fontSize: 35),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Veuillez compléter ce champ";
-                      }
-                      return null;
-                    },
-                    controller: LoginController,
                   ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(bottom: 20),
-                  child: TextFormField(
-                    obscureText: !_isPasswordVisible,
-                    style: const TextStyle(color: Colors.black),
-                    decoration: InputDecoration(
-                      labelText: "Mot De Passe",
-                      labelStyle: const TextStyle(color: Colors.black),
-                      hintText: "Veuillez saisir un mot de passe",
-                      border: const OutlineInputBorder(),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _isPasswordVisible
-                            ? Icons.visibility // Si le mot de passe est visible, affiche l'icône "œil"
-                            : Icons.visibility_off, // Sinon afficher l'icône "œil barré"
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _isPasswordVisible = !_isPasswordVisible;
-                          });
-                        },
+                  Container(
+                    margin: const EdgeInsets.only(top: 20, bottom: 20),
+                    child: TextFormField(
+                      style: const TextStyle(color: Colors.black),
+                      decoration: const InputDecoration(
+                        labelText: "Identifiant",
+                        labelStyle: TextStyle(color: Colors.black),
+                        hintText: "Veuillez saisir un identifiant",
+                        border: OutlineInputBorder(),
                       ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Veuillez compléter ce champ";
+                        }
+                        return null;
+                      },
+                      controller: LoginController,
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Veuillez compléter ce champ";
-                      }
-                      return null;
-                    },
-                    controller: PassWordController,
                   ),
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 20),
+                    child: TextFormField(
+                      obscureText: !_isPasswordVisible,
+                      style: const TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        labelText: "Mot De Passe",
+                        labelStyle: const TextStyle(color: Colors.black),
+                        hintText: "Veuillez saisir un mot de passe",
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _isPasswordVisible
+                                ? Icons.visibility // Si le mot de passe est visible
+                                : Icons.visibility_off, // Si le mot de passe est masqué
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isPasswordVisible = !_isPasswordVisible;
+                            });
+                          },
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Veuillez compléter ce champ";
+                        }
+                        return null;
+                      },
+                      controller: PassWordController,
+                    ),
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
                       onPressed: _connexion,
                       child: const Text(
                         "Valider",
                         style: TextStyle(color: Colors.black),
                       ),
+                    ),
                   ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top: 300, left: 10, bottom: 10),
-                  child: (
-                    const Text("Avez-vous oublier un identifiant ou mot de passe ?",
+                  Container(
+                    margin: const EdgeInsets.only(top: 300, left: 10, bottom: 10),
+                    child: const Text(
+                      "Avez-vous oublié un identifiant ou mot de passe ?",
                       style: TextStyle(
-                        fontSize: 15.6
+                        fontSize: 15.6,
                       ),
-                    )
+                    ),
                   ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(left: 10),
-                  child: (
-                      const Text("Veuillez nous contacter sur ce 05 87 98 45 61",
-                        style: TextStyle(
-                            fontSize: 15.6
-                        ),
-                      )
+                  Container(
+                    margin: const EdgeInsets.only(left: 10),
+                    child: const Text(
+                      "Veuillez nous contacter au 05 87 98 45 61",
+                      style: TextStyle(
+                        fontSize: 15.6,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
     );
   }
+
 }

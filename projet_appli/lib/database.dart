@@ -26,6 +26,14 @@ class DatabaseHelper {
     );
   }
 
+  Future<void> resetTechnicianLoginStatus() async {
+    Database db = await database;
+
+    await db.rawUpdate(
+        'UPDATE Technicien SET estConnecte = 0 WHERE estConnecte = 1'
+    );
+  }
+
   Future _onCreate(Database db, int version) async {
     // Création des tables
     await db.execute('''

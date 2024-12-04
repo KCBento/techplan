@@ -106,12 +106,11 @@ class _AgendaPageState extends State<AgendaPage> {
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(
-                          builder: (Build) => const AddEventPage(),
-                        ),
-                            (Route<dynamic> route) => true,
-                      );
+                      // Réinitialiser le statut de connexion du technicien
+                      DatabaseHelper().resetTechnicianLoginStatus();
+
+                      // Naviguer vers la page de connexion et supprimer toutes les routes précédentes
+                      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
                     },
                     child: const Text("Déconnecter"),
                   ),
