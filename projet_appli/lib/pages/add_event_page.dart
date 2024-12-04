@@ -63,7 +63,7 @@ class _AddEventPageState extends State<AddEventPage> {
               child: Column(
                 children: [
                   Container(
-                    margin: const EdgeInsets.only(top: 156, bottom: 10),
+                    margin: const EdgeInsets.only(top: 100, bottom: 10),
                     child: const Text(
                       "Connexion",
                       style: TextStyle(fontSize: 35),
@@ -132,7 +132,7 @@ class _AddEventPageState extends State<AddEventPage> {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.only(top: 300, left: 10, bottom: 10),
+                    margin: const EdgeInsets.only(top: 130, left: 10, bottom: 10),
                     child: const Text(
                       "Avez-vous oublié un identifiant ou mot de passe ?",
                       style: TextStyle(
