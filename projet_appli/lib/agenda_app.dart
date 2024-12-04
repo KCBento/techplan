@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mon_agenda/pages/add_event_page.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:signature/signature.dart'; // Import du package pour la signature électronique
@@ -88,6 +89,42 @@ class _AgendaPageState extends State<AgendaPage> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text("Déconnexion"),
+                content: const Text("Voulez-vous vraiment vous déconnecter ?"),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                    },
+                    child: const Text("Annuler"),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (Build) => const AddEventPage(),
+                        ),
+                            (Route<dynamic> route) => true,
+                      );
+                    },
+                    child: const Text("Déconnecter"),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        child: const Icon(Icons.logout),
+        tooltip: 'Se déconnecter',
+        backgroundColor: Colors.blue,
+      ),
+
     );
   }
 
