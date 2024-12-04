@@ -53,7 +53,7 @@ class _AddEventPageState extends State<AddEventPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Bienvenue sur l'agenda de techplan"),
+          title: const Text("Bienvenue sur l'agenda de techplan"),titleTextStyle: TextStyle(color: Colors.black, fontSize: 25),
         ),
         body: SingleChildScrollView(
           child: Container(
@@ -77,6 +77,7 @@ class _AddEventPageState extends State<AddEventPage> {
                         labelText: "Identifiant",
                         labelStyle: TextStyle(color: Colors.black),
                         hintText: "Veuillez saisir un identifiant",
+                        hintStyle: TextStyle(color: Colors.black),
                         border: OutlineInputBorder(),
                       ),
                       validator: (value) {
@@ -127,7 +128,7 @@ class _AddEventPageState extends State<AddEventPage> {
                       onPressed: _connexion,
                       child: const Text(
                         "Valider",
-                        style: TextStyle(color: Colors.black),
+                        style: TextStyle(color: Colors.black, fontSize: 18),
                       ),
                     ),
                   ),
