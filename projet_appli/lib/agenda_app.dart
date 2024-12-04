@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mon_agenda/pages/add_event_page.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:signature/signature.dart'; // Import du package pour la signature électronique
+import 'package:signature/signature.dart';
+import 'package:intl/intl.dart'; // Ajout de l'import pour formater la date
 import '../database.dart';
 
 class AgendaApp extends StatelessWidget {
@@ -27,7 +28,6 @@ class _AgendaPageState extends State<AgendaPage> {
   late DateTime _selectedDay;
   late Map<DateTime, List<Intervention>> _interventions;
 
-
   @override
   void initState() {
     super.initState();
@@ -35,7 +35,6 @@ class _AgendaPageState extends State<AgendaPage> {
     _interventions = {};
     _loadInterventionsForTechnician();
   }
-
 
   Future<void> _loadInterventionsForTechnician() async {
     int technicianId = await DatabaseHelper().getTechnicianId();
@@ -51,6 +50,10 @@ class _AgendaPageState extends State<AgendaPage> {
         _interventions[date]!.add(intervention);
       }
     });
+  }
+
+  String formatDate(DateTime date) {
+    return DateFormat('yyyy-MM-dd HH:mm').format(date);
   }
 
   @override
@@ -83,7 +86,7 @@ class _AgendaPageState extends State<AgendaPage> {
               child: Text('Ajouter une intervention'),
             ),
             SizedBox(
-              height: MediaQuery.of(context).size.height - 400, // Ajustez selon vos besoins
+              height: MediaQuery.of(context).size.height - 400,
               child: _buildInterventionList(),
             ),
           ],
@@ -127,7 +130,7 @@ class _AgendaPageState extends State<AgendaPage> {
   }
 
   Widget _buildInterventionList() {
-    final normalizedSelectedDay = DateTime(_selectedDay.year, _selectedDay.month, _selectedDay.day,);
+    final normalizedSelectedDay = DateTime(_selectedDay.year, _selectedDay.month, _selectedDay.day);
     final interventionsForSelectedDay = _interventions[normalizedSelectedDay] ?? [];
     return ListView.builder(
       itemCount: interventionsForSelectedDay.length,
@@ -137,8 +140,7 @@ class _AgendaPageState extends State<AgendaPage> {
           title: Text(intervention.titre),
           subtitle: Text(
               'Client: ${intervention.client} - Statut: ${intervention.statut}\n'
-                  'De ${intervention.debut.hour}:${intervention.debut.minute.toString().padLeft(2, '0')} '
-                  'à ${intervention.fin.hour}:${intervention.fin.minute.toString().padLeft(2, '0')}'),
+                  'De ${formatDate(intervention.debut)} à ${formatDate(intervention.fin)}'),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -166,7 +168,7 @@ class _AgendaPageState extends State<AgendaPage> {
     final clientController = TextEditingController();
     DateTime selectedDate = _selectedDay;
     TimeOfDay selectedStartTime = TimeOfDay(hour: 9, minute: 0);
-    Duration selectedDuration = Duration(hours: 1);
+    Duration selectedDuration = Duration(hours: 1); // Durée par défaut
     String? selectedFilePath;
     String comment = '';
 
@@ -176,9 +178,9 @@ class _AgendaPageState extends State<AgendaPage> {
         return AlertDialog(
           title: Text('Ajouter une intervention'),
           content: SingleChildScrollView(
-            child: Padding (
+            child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child : Column(
+              child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
@@ -190,7 +192,7 @@ class _AgendaPageState extends State<AgendaPage> {
                     decoration: InputDecoration(labelText: 'Client'),
                   ),
                   ListTile(
-                    title: Text('Date de l\'intervention: ${selectedDate.toLocal()}'),
+                    title: Text('Date de l\'intervention: ${formatDate(selectedDate)}'),
                     onTap: () {},
                   ),
                   ListTile(
@@ -282,7 +284,6 @@ class _AgendaPageState extends State<AgendaPage> {
     _loadInterventionsForTechnician();
   }
 
-
   void _removeIntervention(Intervention intervention) async {
     await DatabaseHelper().deleteIntervention(intervention);
     setState(() {
@@ -305,135 +306,73 @@ class _AgendaPageState extends State<AgendaPage> {
         return AlertDialog(
           title: Text('Modifier l\'intervention'),
           content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleController,
-                  decoration: InputDecoration(labelText: 'Titre de l\'intervention'),
-                ),
-                TextField(
-                  controller: clientController,
-                  decoration: InputDecoration(labelText: 'Client'),
-                ),
-                TextField(
-                  controller: statusController,
-                  decoration: InputDecoration(labelText: 'Statut'),
-                ),
-                TextField(
-                  controller: durationController,
-                  decoration: InputDecoration(labelText: 'Durée (en minutes)'),
-                  keyboardType: TextInputType.number,
-                ),
-                ListTile(
-                  title: Text('Heure de début: ${selectedStartTime.format(context)}'),
-                  onTap: () async {
-                    final timePicked = await showTimePicker(
-                      context: context,
-                      initialTime: selectedStartTime,
-                    );
-                    if (timePicked != null) {
-                      setState(() {
-                        selectedStartTime = timePicked;
-                      });
-                    }
-                  },
-                ),
-                TextField(
-                  controller: commentController,
-                  decoration: InputDecoration(labelText: 'Commentaire'),
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: titleController,
+                    decoration: InputDecoration(labelText: 'Titre'),
+                  ),
+                  TextField(
+                    controller: clientController,
+                    decoration: InputDecoration(labelText: 'Client'),
+                  ),
+                  TextField(
+                    controller: statusController,
+                    decoration: InputDecoration(labelText: 'Statut'),
+                  ),
+                  TextField(
+                    controller: durationController,
+                    decoration: InputDecoration(labelText: 'Durée (en minutes)'),
+                    keyboardType: TextInputType.number,
+                  ),
+                  TextField(
+                    controller: commentController,
+                    decoration: InputDecoration(labelText: 'Commentaire'),
+                  ),
+                  ListTile(
+                    title: Text('Heure de début: ${selectedStartTime.format(context)}'),
+                    onTap: () async {
+                      final timePicked = await showTimePicker(
+                        context: context,
+                        initialTime: selectedStartTime,
+                      );
+                      if (timePicked != null) {
+                        setState(() {
+                          selectedStartTime = timePicked;
+                        });
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
             TextButton(
-              onPressed: () async {
-                final title = titleController.text;
-                final client = clientController.text;
-                final status = statusController.text;
-                final duration = int.tryParse(durationController.text) ?? 60;
-                final comment = commentController.text;
-                final updatedIntervention = Intervention(
-                  id: intervention.id,
-                  titre: title,
-                  client: client,
-                  statut: status,
-                  debut: DateTime(intervention.debut.year, intervention.debut.month, intervention.debut.day, selectedStartTime.hour, selectedStartTime.minute),
-                  fin: DateTime(intervention.debut.year, intervention.debut.month, intervention.debut.day, selectedStartTime.hour, selectedStartTime.minute).add(Duration(minutes: duration)),
-                  commentaire: comment,
-                  fichierPath: intervention.fichierPath,
-                );
-                await DatabaseHelper().updateIntervention(updatedIntervention);
-                setState(() {
-                  _interventions[_selectedDay]?.remove(intervention);
-                  _interventions[_selectedDay]?.add(updatedIntervention);
-                });
-                _loadInterventionsForTechnician();
-                Navigator.of(context).pop();
-                },
-                child: Text('Sauvegarder'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text('Annuler'),
-              ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showSignatureDialog(BuildContext context, Intervention intervention) {
-    final SignatureController _signatureController = SignatureController(
-      penStrokeWidth: 2,
-      penColor: Colors.black,
-      exportBackgroundColor: Colors.white,
-    );
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Signature de l\'intervention'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                height: 200,
-                width: 300,
-                color: Colors.grey[300],
-                child: Signature(
-                  controller: _signatureController,
-                  backgroundColor: Colors.white,
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  _signatureController.clear();
-                },
-                child: Text('Effacer la signature'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                if (_signatureController.isNotEmpty) {
-                  final signature = await _signatureController.toPngBytes();
-                  if (signature != null) {
-                    setState(() {
-                      intervention.statut = 'Terminée';
-                    });
-                  }
+              onPressed: () {
+                final newTitle = titleController.text;
+                final newClient = clientController.text;
+                final newStatus = statusController.text;
+                final newDuration = int.tryParse(durationController.text) ?? 60;
+                final newComment = commentController.text;
+                if (newTitle.isNotEmpty && newClient.isNotEmpty) {
+                  final newStartDateTime = DateTime(intervention.debut.year, intervention.debut.month, intervention.debut.day, selectedStartTime.hour, selectedStartTime.minute);
+                  final newEndDateTime = newStartDateTime.add(Duration(minutes: newDuration));
+                  _updateIntervention(intervention.copyWith(
+                    titre: newTitle,
+                    client: newClient,
+                    statut: newStatus,
+                    debut: newStartDateTime,
+                    fin: newEndDateTime,
+                    commentaire: newComment,
+                  ));
                   Navigator.of(context).pop();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Veuillez signer avant de terminer')),
-                  );
                 }
               },
-              child: Text('Confirmer la signature'),
+              child: Text('Mettre à jour'),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -444,20 +383,60 @@ class _AgendaPageState extends State<AgendaPage> {
       },
     );
   }
+
+  void _updateIntervention(Intervention intervention) async {
+    await DatabaseHelper().updateIntervention(intervention);
+    setState(() {
+      final date = DateTime(intervention.debut.year, intervention.debut.month, intervention.debut.day);
+      _interventions[date] = _interventions[date]?.map((i) => i.id == intervention.id ? intervention : i).toList() ?? [intervention];
+    });
+  }
+
+  void _showSignatureDialog(BuildContext context, Intervention intervention) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Signature'),
+          content: Signature(
+            height: 150,
+            width: double.infinity,
+            controller: SignatureController(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Sauvegarde de la signature ou d'autres actions ici
+                Navigator.of(context).pop();
+              },
+              child: Text('Valider'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
+
 class Intervention {
-  int? id;
-  final String titre;
-  final String client;
-  String statut;
-  final DateTime debut;
-  final DateTime fin;
-  final String commentaire;
-  final String? fichierPath;
+   int? id;
+   String titre;
+   String client;
+   String statut;
+   DateTime debut;
+   DateTime fin;
+   String commentaire;
+   String? fichierPath;
 
   Intervention({
-    required this.id,
+    this.id,
     required this.titre,
     required this.client,
     required this.statut,
@@ -466,4 +445,26 @@ class Intervention {
     required this.commentaire,
     this.fichierPath,
   });
+
+Intervention copyWith({
+  int? id,
+  String? titre,
+  String? client,
+  String? statut,
+  DateTime? debut,
+  DateTime? fin,
+  String? commentaire,
+  String? fichierPath,
+}) {
+  return Intervention(
+    id: id ?? this.id,
+    titre: titre ?? this.titre,
+    client: client ?? this.client,
+    statut: statut ?? this.statut,
+    debut: debut ?? this.debut,
+    fin: fin ?? this.fin,
+    commentaire: commentaire ?? this.commentaire,
+    fichierPath: fichierPath ?? this.fichierPath,
+  );
+}
 }
