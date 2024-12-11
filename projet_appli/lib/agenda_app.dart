@@ -394,29 +394,59 @@ class _AgendaPageState extends State<AgendaPage> {
   }
 
   void _showSignatureDialog(BuildContext context, Intervention intervention) {
+    final SignatureController _signatureController = SignatureController(
+      penStrokeWidth: 2,
+      penColor: Colors.black,
+      exportBackgroundColor: Colors.white,
+    );
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Signature'),
-          content: Signature(
-            height: 150,
-            width: double.infinity,
-            controller: SignatureController(),
+          title: Text('Signature de l\'intervention'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                height: 200,
+                width: 300,
+                color: Colors.grey[300],
+                child: Signature(
+                  controller: _signatureController,
+                  backgroundColor: Colors.white,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  _signatureController.clear();
+                },
+                child: Text('Effacer la signature'),
+              ),
+            ],
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
+              onPressed: () async {
+                if (_signatureController.isNotEmpty) {
+                  final signature = await _signatureController.toPngBytes();
+                  if (signature != null) {
+                    setState(() {
+                      intervention.statut = 'Terminée';
+                    });
+                  }
+                  Navigator.of(context).pop();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Veuillez signer avant de terminer')),
+                  );
+                }
               },
-              child: Text('Annuler'),
+              child: Text('Confirmer la signature'),
             ),
             TextButton(
-              onPressed: () {
-                // Sauvegarde de la signature ou d'autres actions ici
-                Navigator.of(context).pop();
-              },
-              child: Text('Valider'),
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Annuler'),
             ),
           ],
         );
