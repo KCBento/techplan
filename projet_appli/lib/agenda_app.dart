@@ -126,7 +126,6 @@ class _AgendaPageState extends State<AgendaPage> {
         tooltip: 'Se déconnecter',
         backgroundColor: Colors.blue,
       ),
-
     );
   }
 
