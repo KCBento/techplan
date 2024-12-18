@@ -146,6 +146,38 @@ class _AgendaPageState extends State<AgendaPage> {
   }
 
   Widget _buildInterventionList() {
+
+    void _removeIntervention(Intervention intervention) async {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Confirmer la suppression"),
+            content: const Text("Voulez-vous vraiment supprimer cette intervention ?"),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Ferme la boîte de dialogue sans supprimer
+                },
+                child: const Text("Annuler"),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await DatabaseHelper().deleteIntervention(intervention);
+                  setState(() {
+                    _interventions[_selectedDay]?.remove(intervention);
+                  });
+                  _loadInterventionsForTechnician();
+                  Navigator.of(context).pop(); // Ferme la boîte de dialogue après la suppression
+                },
+                child: const Text("Supprimer"),
+              ),
+            ],
+          );
+        },
+      );
+    }
+
     final normalizedSelectedDay = DateTime(_selectedDay.year, _selectedDay.month, _selectedDay.day);
     final interventionsForSelectedDay = _interventions[normalizedSelectedDay] ?? [];
     return ListView.builder(
