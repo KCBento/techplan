@@ -449,6 +449,7 @@ class _AgendaPageState extends State<AgendaPage> {
                     setState(() {
                       intervention.statut = 'Terminée';
                     });
+                    await DatabaseHelper().updateStatutIntervention(intervention);
                   }
                   Navigator.of(context).pop();
                 } else {

@@ -416,7 +416,18 @@ class DatabaseHelper {
     );
   }
 
-
+  Future<void> updateStatutIntervention(Intervention intervention) async {
+    Database db = await database;
+    // Exécution de la mise à jour
+    await db.update(
+      'Intervention', // Nom de la table
+      {
+        'Statut': intervention.statut,
+      },
+      where: 'id_Intervention = ?', // Clause WHERE pour cibler une ligne
+      whereArgs: [intervention.id], // Arguments pour WHERE
+    );
+  }
 
 
 
