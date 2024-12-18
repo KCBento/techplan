@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mon_agenda/agenda_app.dart';
-import 'package:mon_agenda/pages/add_event_page.dart';
+import 'package:mon_agenda/connexion.dart';
 // Importez d'autres pages nécessaires
-import 'package:mon_agenda/pages/home_page.dart';
 
 void main() {
   runApp(const MyApp());

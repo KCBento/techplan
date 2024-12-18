@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 
-import '../agenda_app.dart';
-import '../database.dart';
+import 'agenda_app.dart';
+import 'database.dart';
 
 class AddEventPage extends StatefulWidget {
   const AddEventPage({super.key});
