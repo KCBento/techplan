@@ -27,6 +27,7 @@ class AgendaPage extends StatefulWidget {
 class _AgendaPageState extends State<AgendaPage> {
   late DateTime _selectedDay;
   late Map<DateTime, List<Intervention>> _interventions;
+  String nomTechnicien = "";
 
   @override
   void initState() {
@@ -34,6 +35,7 @@ class _AgendaPageState extends State<AgendaPage> {
     _selectedDay = DateTime.now();
     _interventions = {};
     _loadInterventionsForTechnician();
+    _loadTechnicianName();
   }
 
   Future<void> _loadInterventionsForTechnician() async {
@@ -52,6 +54,13 @@ class _AgendaPageState extends State<AgendaPage> {
     });
   }
 
+  Future<void> _loadTechnicianName() async {
+    String name = await DatabaseHelper().getTechnicianName();
+    setState(() {
+      nomTechnicien = name; // Nom du technicien connecté
+    });
+  }
+
   String formatDate(DateTime date) {
     return DateFormat('yyyy-MM-dd HH:mm').format(date);
   }
@@ -61,6 +70,13 @@ class _AgendaPageState extends State<AgendaPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Mon Agenda'),
+        actions: [
+          // Affichage du nom du technicien à droite de l'AppBar
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(nomTechnicien),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(

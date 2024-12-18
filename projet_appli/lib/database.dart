@@ -253,6 +253,24 @@ class DatabaseHelper {
 
   }
 
+  Future<String> getTechnicianName() async {
+    Database db = await database;
+
+    // Requête pour vérifier les identifiants
+    List<Map<String, dynamic>> result = await db.rawQuery(
+        '''
+      SELECT Prenom, Nom FROM Technicien
+      WHERE estConnecte = ?
+      LIMIT 1
+      ''',
+        [1]
+    );
+
+    String prenom = result[0]['Prenom'];
+    String nom = result[0]['Nom'];
+    return '$prenom $nom'; // Retourne le prénom et le nom combinés
+  }
+
   Future<int> addIntervention(int technicianId, Intervention intervention) async {
     Database db = await database;
 
