@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'agenda_app.dart';
 import 'database.dart';
 
-class AddEventPage extends StatefulWidget {
-  const AddEventPage({super.key});
+class Connexion extends StatefulWidget {
+  const Connexion({super.key});
 
   @override
-  State<AddEventPage> createState() => _AddEventPageState();
+  State<Connexion> createState() => _ConnexionState();
 }
 
-class _AddEventPageState extends State<AddEventPage> {
+class _ConnexionState extends State<Connexion> {
   final _formkey = GlobalKey<FormState>();
   final LoginController = TextEditingController();
   final PassWordController = TextEditingController();

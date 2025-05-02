@@ -137,7 +137,7 @@ class DatabaseHelper {
     // Insertion des données dans Intervention
     await db.execute('''
       INSERT INTO Intervention (Titre, Date, Heure, Statut, id_Description, id_Fichier, Client)
-      VALUES ('Intervention 1', '2024-11-01', '10:00', 'En cours', 1, 1, 'Paul'),
+      VALUES ('Intervention 1', '2024-11-01', '10:00', 'En cours', 1, 1, 'Pol'),
              ('Intervention 2', '2024-06-01', '11:00', 'Terminé', 2, 2, 'Lorenzo'),
              ('Intervention 3', '2024-07-01', '09:00', 'En attente', 3, 3, 'Valentin');
     ''');

@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       // Définir les différentes routes
       routes: {
-        '/': (context) => const AddEventPage(), // Page initiale (connexion)
+        '/': (context) => const Connexion(), // Page initiale (connexion)
         '/home': (context) => AgendaPage(), // Page d'accueil (après connexion)
       },
     );
